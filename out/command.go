@@ -87,8 +87,14 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 
 		var setOutput []byte
 		setOutput, err = c.flyCommand.SetPipeline(p.Name, configFilepath, varsFilepaths, p.Vars)
-		c.logger.Debugf("pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
-		fmt.Fprintf(os.Stderr, "pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
+
+		if p.HideStdout {
+			fmt.Fprintf(os.Stderr, "pipeline '%s' set; output:\n\nHidden due to HideStdout flag set to \"true\".\n", p.Name)
+		} else {
+			c.logger.Debugf("pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
+			fmt.Fprintf(os.Stderr, "pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
+		}
+
 		if err != nil {
 			return concourse.OutResponse{}, err
 		}
